@@ -1,8 +1,10 @@
 FROM alpine:3.9 as builder
 
 WORKDIR /home/alpine
-RUN apk --no-cache add curl unzip
+RUN apk --no-cache add curl unzip make gcc libc-dev libx11-dev libxft-dev libxinerama-dev x11vnc xvfb supervisor
 RUN curl https://codeload.github.com/novnc/noVNC/zip/v1.1.0  -o /home/alpine/noVNC-1.1.0.zip && curl https://codeload.github.com/novnc/websockify/zip/v0.8.0  -o /home/alpine/websockify-0.8.0.zip && cd /home/alpine && unzip noVNC-1.1.0.zip && unzip websockify-0.8.0.zip && ls -lah &&  mv /home/alpine/noVNC-1.1.0 /home/alpine/novnc && mv /home/alpine/websockify-0.8.0 /home/alpine/novnc/utils/websockify && rm -f noVNC-1.1.0.zip websockify-0.8.0.zip
+RUN curl https://dl.suckless.org/dwm/dwm-6.2.tar.gz -o dwm-6.2.tar.gz && tar -zxf dwm-6.2.tar.gz && cd dwm-6.2  && curl https://dwm.suckless.org/patches/alwaysfullscreen/dwm-alwaysfullscreen-6.1.diff -o dwm-alwaysfullscreen-6.1.diff && curl https://dwm.suckless.org/patches/aspectresize/dwm-aspectresize-6.2.diff -o dwm-aspectresize-6.2.diff && curl https://dwm.suckless.org/patches/actualfullscreen/dwm-actualfullscreen-20191112-cb3f58a.diff -o dwm-actualfullscreen-20191112-cb3f58a.diff  && patch < dwm-actualfullscreen-20191112-cb3f58a.diff && patch < dwm-alwaysfullscreen-6.1.diff && patch < dwm-aspectresize-6.2.diff && sed 's/tags\[\] = .*/tags\[\] = \{ "1" \};/' config.def.h > config.def.h.temp && sed 's/^.*Firefox.*//g' config.def.h.temp >config.def.h && make
+
 
 
 FROM alpine:3.9
@@ -27,7 +29,7 @@ RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
 RUN apk add --update --no-cache \
     x11vnc xvfb supervisor \
-    dwm dmenu ii st \
+    dmenu ii st \
     ttf-ubuntu-font-family firefox-esr wqy-zenhei bash \
  && addgroup alpine \
  && adduser -G alpine -s /bin/ash -D alpine \
@@ -38,11 +40,19 @@ RUN apk add --update --no-cache \
 WORKDIR /home/alpine
 
 COPY --from=builder /home/alpine /home/alpine
+COPY --from=builder /home/alpine/dwm-6.2/dwm /usr/local/bin/dwm
 
 RUN  mkdir -p '/home/alpine/.vnc' \
    && mkdir -p '/home/alpine/.cache/dconf/' \
    && mkdir -p '/home/alpine/.mozilla/firefox/2r0k03hw.default/' \
    && mkdir -p '/home/alpine/.mozilla/firefox/Crash Reports/'  \
+   && mkdir -p "/usr/share/xsessions/" \
+   && chmod +x '/usr/local/bin/dwm' \
+   && echo $'[Desktop Entry] \n\
+Name=dwm\n\
+Comment=dwm Desktop Environment\n\
+Exec=/usr/local/bin/dwm \n\
+TryExec=/usr/local/bin/dwm \n' \
    && echo $'[Profile0] \n\
 Name=default \n\
 IsRelative=1 \n\
@@ -69,7 +79,7 @@ autorestart=true \n\
  \n\
 [program:dwm] \n\
 priority=400 \n\
-command=/usr/bin/dwm \n\
+command=/usr/local/bin/dwm \n\
 user=alpine \n\
 autorestart=true \n\
 environment=DISPLAY=":0",HOME="/home/alpine",USER="alpine" \n\
