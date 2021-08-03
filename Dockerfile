@@ -42,6 +42,7 @@ WORKDIR /home/alpine
 COPY --from=builder /home/alpine/novnc /home/alpine/novnc
 COPY --from=builder /home/alpine/dwm-6.2/dwm /usr/local/bin/dwm
 COPY alpine/SimSun.ttf /usr/share/fonts/simsun.ttf
+COPY run.sh /home/alpine/run.sh
 RUN  mkdir -p '/home/alpine/.vnc' \
    && mkdir -p '/home/alpine/.cache/dconf/' \
    && mkdir -p '/home/alpine/.mozilla/firefox/2r0k03hw.default/' \
@@ -62,39 +63,6 @@ Path=2r0k03hw.default \n\
 StartWithLastProfile=1 \n\
 Version=2 \n\
  ' > /home/alpine/.mozilla/firefox/profiles.ini \
-   && echo $'[supervisord] \n\
-nodaemon=true \n\
- \n\
-[program:Xvfb] \n\
-priority=100 \n\
-command=/usr/bin/Xvfb :0 -screen 0 "%(ENV_DISPLAY_WIDTH)s"x"%(ENV_DISPLAY_HEIGHT)s"x24 \n\
-user=alpine \n\
-autorestart=true \n\
- \n\
-[program:x11vnc] \n\
-priority=300 \n\
-command=/usr/bin/x11vnc -passwd "%(ENV_VNC_PASSWD)s" -display :0 -xkb -noxrecord -noxfixes -noxdamage -wait 5 -shared  \n\
-user=alpine \n\
-autorestart=true \n\
- \n\
-[program:dwm] \n\
-priority=400 \n\
-command=/usr/local/bin/dwm \n\
-user=alpine \n\
-autorestart=true \n\
-environment=DISPLAY=":0",HOME="/home/alpine",USER="alpine" \n\
- \n\
-[program:novnc] \n\
-priority=500 \n\
-command=/home/alpine/novnc/utils/launch.sh --vnc localhost:5900 --listen 8060 \n\
-user=alpine \n\
-autorestart=true \n\
- \n\
-[program:firefox] \n\
-command=/usr/bin/firefox --display :0 -no-remote -P default  -new-window "%(ENV_HOMEPAGE)s" 2 > /dev/null \n\
-user=alpine \n\
-autorestart=true \n\
-' > /etc/supervisor/conf.d/supervisord.conf \
    && echo -e -n "\x00\x00" > /home/alpine/.cache/dconf/user \
    && echo '{"created": 1566899590753,"firstUse": null}' > /home/alpine/.mozilla/firefox/2r0k03hw.default/times.json \
    && echo '1566462541' > /home/alpine/.mozilla/firefox/Crash Reports/InstallTime20190814054548 \
@@ -102,12 +70,9 @@ autorestart=true \n\
    && chown -R alpine:alpine /home/alpine \
    && cd /home/alpine/novnc/utils && sed -i 's/ps -p/ps | grep/' launch.sh
 
-# RUN cat /home/alpine/.mozilla/firefox/profiles.ini && cat /etc/supervisor/conf.d/supervisord.conf
-# RUN apk add --update --no-cache bash
-
 ENV PORT 8060
 
 EXPOSE 8060
 VOLUME /home/alpine/Downloads
 USER alpine
-CMD ["/usr/bin/supervisord","-c","/etc/supervisor/conf.d/supervisord.conf" ]
+CMD [ "/home/alpine/run.sh" ]
