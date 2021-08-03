@@ -41,7 +41,7 @@ WORKDIR /home/alpine
 
 COPY --from=builder /home/alpine/novnc /home/alpine/novnc
 COPY --from=builder /home/alpine/dwm-6.2/dwm /usr/local/bin/dwm
-COPY SimSun.ttf /usr/share/fonts/simsun.ttf
+COPY alpine/SimSun.ttf /usr/share/fonts/simsun.ttf
 RUN  mkdir -p '/home/alpine/.vnc' \
    && mkdir -p '/home/alpine/.cache/dconf/' \
    && mkdir -p '/home/alpine/.mozilla/firefox/2r0k03hw.default/' \
