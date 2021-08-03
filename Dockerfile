@@ -104,7 +104,9 @@ autorestart=true \n\
 
 # RUN cat /home/alpine/.mozilla/firefox/profiles.ini && cat /etc/supervisor/conf.d/supervisord.conf
 # RUN apk add --update --no-cache bash
-# expose ports
+
+ENV PORT 8060
+
 EXPOSE 8060
 VOLUME /home/alpine/Downloads
 USER alpine
