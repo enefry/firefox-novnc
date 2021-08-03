@@ -35,4 +35,5 @@ user=${WHOAMI} \n\
 autorestart=true \n\
 " > /home/alpine/supervisord.conf
 
+cat /home/alpine/supervisord.conf
 /usr/bin/supervisord "-c" "/home/alpine/supervisord.conf"
