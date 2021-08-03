@@ -1,0 +1,26 @@
+{
+    "name": "FireFox",
+    "description": "deploy Firefox to Heroku",
+    "keywords": ["Firefox", "novnc"],
+    "env": {
+        "VNC_PASSWD": {
+            "description": "密码",
+            "value": "docker-firefox"
+        },
+        "HOMEPAGE": {
+            "description": "主页",
+            "value": "docker-firefox"
+        },
+        "DISPLAY_WIDTH": {
+            "description": "窗口宽度",
+            "value": "1600"
+        },
+        "DISPLAY_HEIGHT": {
+            "description": "窗口高度",
+            "value": "900"
+        }
+    },
+    "website": "https://github.com/enefry/firefox-novnc",
+    "repository": "https://github.com/enefry/firefox-novnc",
+    "stack": "container"
+}
